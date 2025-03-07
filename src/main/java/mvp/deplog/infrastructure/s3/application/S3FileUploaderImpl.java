@@ -1,9 +1,9 @@
 package mvp.deplog.infrastructure.s3.application;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.SdkClientException;
+import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,6 +17,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLDecoder;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 
 @RequiredArgsConstructor
 @Service
@@ -50,17 +53,22 @@ public class S3FileUploaderImpl implements FileUploader {
         return S3FileUtil.getFullPath(bucket, filePath);
     }
 
+    @Override
+    public String generatePreSignedUrl(String contentType, String dirName) {
+        Date expiration = Date.from(LocalDateTime.now().plusMinutes(10).atZone(ZoneId.systemDefault()).toInstant());
+        String filePath = dirName + "/" + S3FileUtil.createSaveFileNameFromContentType(contentType);
+        GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucket, filePath)
+                .withMethod(HttpMethod.PUT)
+                .withExpiration(expiration);
+        return amazonS3.generatePresignedUrl(generatePresignedUrlRequest).toString();
+    }
+
     private void uploadS3(InputStream inputStream, String filePath, ObjectMetadata metadata) {
         try {
             amazonS3.putObject(new PutObjectRequest(bucket, filePath, inputStream, metadata));
         } catch (Exception e) {
             rollbackIfExists(bucket, filePath);
         }
-    }
-
-    @Override
-    public String getPreSignedUrl() {
-        return null;
     }
 
     @Override

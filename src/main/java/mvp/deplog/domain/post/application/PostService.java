@@ -182,22 +182,6 @@ public class PostService {
         return SuccessResponse.of(fileUrlRes);
     }
 
-    public SuccessResponse<FileUrlRes> uploadFile(MultipartFile multipartFile) throws IOException {
-        String filePath = fileUploader.uploadMultipartFile(multipartFile, DIRNAME);
-        FileUrlRes fileUrlRes = FileUrlRes.builder()
-                .fileUrl(filePath)
-                .build();
-        return SuccessResponse.of(fileUrlRes);
-    }
-
-    public SuccessResponse<FileUrlRes> uploadStreamFile(HttpServletRequest request) throws IOException{
-        String filePath = fileUploader.uploadStreamFile(request, DIRNAME);
-        FileUrlRes fileUrlRes = FileUrlRes.builder()
-                .fileUrl(filePath)
-                .build();
-        return SuccessResponse.of(fileUrlRes);
-    }
-
     public SuccessResponse<PageResponse> getSearchPosts(String searchWord, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
         Page<Post> posts = postRepository.findByTitleContainingOrSearchContentContaining(searchWord, searchWord, pageable);
@@ -462,5 +446,29 @@ public class PostService {
                 .build();
 
         return SuccessResponse.of(createPostRes);
+    }
+
+    public SuccessResponse<FileUrlRes> uploadFile(MultipartFile multipartFile) throws IOException {
+        String filePath = fileUploader.uploadMultipartFile(multipartFile, DIRNAME);
+        FileUrlRes fileUrlRes = FileUrlRes.builder()
+                .fileUrl(filePath)
+                .build();
+        return SuccessResponse.of(fileUrlRes);
+    }
+
+    public SuccessResponse<FileUrlRes> uploadStreamFile(HttpServletRequest request) throws IOException{
+        String filePath = fileUploader.uploadStreamFile(request, DIRNAME);
+        FileUrlRes fileUrlRes = FileUrlRes.builder()
+                .fileUrl(filePath)
+                .build();
+        return SuccessResponse.of(fileUrlRes);
+    }
+
+    public SuccessResponse<FileUrlRes> getPreSignedUrl(String contentType) {
+        String preSignedUrl = fileUploader.generatePreSignedUrl(contentType, DIRNAME);
+        FileUrlRes fileUrlRes = FileUrlRes.builder()
+                .fileUrl(preSignedUrl)
+                .build();
+        return SuccessResponse.of(fileUrlRes);
     }
 }

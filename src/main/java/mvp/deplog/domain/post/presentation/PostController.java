@@ -71,26 +71,6 @@ public class PostController implements PostApi {
         return ResponseEntity.ok(postService.uploadImages(multipartFile));
     }
 
-    @PostMapping("/upload-multipart")
-    public ResponseEntity<SuccessResponse<FileUrlRes>> uploadMultipartFile(
-            @RequestPart(value = "postImage") MultipartFile multipartFile
-    ) throws IOException {
-        return ResponseEntity.ok(postService.uploadFile(multipartFile));
-    }
-
-    @PostMapping("/upload-stream")
-    public ResponseEntity<SuccessResponse<FileUrlRes>> uploadStreamFile(
-            HttpServletRequest request
-    ) throws IOException {
-        return ResponseEntity.ok(postService.uploadStreamFile(request));
-    }
-
-//    @GetMapping("/pre-signed-url")
-//    public ResponseEntity<SuccessResponse<FileUrlRes>> getPreSignedUrl(
-//    )  {
-//        return ResponseEntity.ok(postService.getPreSignedUrl());
-//    }
-
     @Override
     @GetMapping("/details/{postId}")
     public ResponseEntity<SuccessResponse<?>> getPostDetail(
@@ -176,5 +156,26 @@ public class PostController implements PostApi {
             @Valid @RequestBody CreatePostReq createPostReq
     ) {
         return ResponseEntity.ok(postService.modifyPost(userDetails.getMember().getId(), postId, createPostReq));
+    }
+
+    @PostMapping("/upload-multipart")
+    public ResponseEntity<SuccessResponse<FileUrlRes>> uploadMultipartFile(
+            @RequestPart(value = "postImage") MultipartFile multipartFile
+    ) throws IOException {
+        return ResponseEntity.ok(postService.uploadFile(multipartFile));
+    }
+
+    @PostMapping("/upload-stream")
+    public ResponseEntity<SuccessResponse<FileUrlRes>> uploadStreamFile(
+            HttpServletRequest request
+    ) throws IOException {
+        return ResponseEntity.ok(postService.uploadStreamFile(request));
+    }
+
+    @GetMapping("/pre-signed-url")
+    public ResponseEntity<SuccessResponse<FileUrlRes>> getPreSignedUrl(
+            @RequestParam(value = "contentType") String contentType
+    )  {
+        return ResponseEntity.ok(postService.getPreSignedUrl(contentType));
     }
 }
