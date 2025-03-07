@@ -9,7 +9,6 @@ import mvp.deplog.domain.post.domain.Post;
 import mvp.deplog.domain.post.domain.Stage;
 import mvp.deplog.domain.post.domain.repository.PostRepository;
 import mvp.deplog.domain.post.dto.response.AnonymousPostDetailRes;
-import mvp.deplog.domain.post.dto.response.MemberPostDetailRes;
 import mvp.deplog.domain.post.exception.ResourceNotFoundException;
 import mvp.deplog.domain.tagging.repository.TaggingRepository;
 import mvp.deplog.global.common.SuccessResponse;

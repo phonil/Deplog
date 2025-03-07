@@ -10,8 +10,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import mvp.deplog.domain.member.domain.Part;
-import mvp.deplog.domain.post.dto.response.*;
 import mvp.deplog.domain.post.dto.request.CreatePostReq;
+import mvp.deplog.domain.post.dto.response.*;
 import mvp.deplog.global.common.Message;
 import mvp.deplog.global.common.PageResponse;
 import mvp.deplog.global.common.SuccessResponse;
@@ -23,6 +23,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Tag(name = "Post API", description = "게시글 관련 API입니다.")
@@ -102,7 +103,7 @@ public interface PostApi {
     @PostMapping("/uploadImages")
     ResponseEntity<SuccessResponse<FileUrlRes>> uploadImage(
             @Parameter(description = "업로드할 이미지 파일 (Multipart form-data 형식)") @RequestPart(value = "postImage") MultipartFile multipartFile
-    );
+    ) throws IOException;
 
     @Operation(summary = "게시글 상세 조회 API", description = "해당 아이디의 게시글을 상세 조회합니다. 회원/비회원에 따라 응답 값이 달라집니다.")
     @ApiResponses(value = {

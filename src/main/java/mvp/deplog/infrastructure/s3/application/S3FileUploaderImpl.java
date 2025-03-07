@@ -1,15 +1,17 @@
 package mvp.deplog.infrastructure.s3.application;
 
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import mvp.deplog.infrastructure.s3.S3FileUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -18,9 +20,8 @@ import java.net.URLDecoder;
 
 @RequiredArgsConstructor
 @Service
-@Transactional(readOnly = true)
 @Slf4j
-public class S3FileServiceImpl implements FileService {
+public class S3FileUploaderImpl implements FileUploader {
 
     private final AmazonS3 amazonS3;
 
@@ -28,32 +29,43 @@ public class S3FileServiceImpl implements FileService {
     private String bucket;
 
     @Override
-    public String uploadFile(MultipartFile file, String dirName) {
-        if (file.isEmpty())
-            return null;
-
-        String originalFileName = file.getOriginalFilename();
-        String saveFileName = S3FileUtil.createSaveFileName(originalFileName); // uuid . ext
-
+    public String uploadMultipartFile(MultipartFile file, String dirName) throws IOException {
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(file.getSize());
         metadata.setContentType(file.getContentType());
 
-        String filePath = dirName + "/" + saveFileName;
-        try (InputStream inputStream = file.getInputStream()) {
-            // S3에 업로드
-            amazonS3.putObject(new PutObjectRequest(bucket, filePath, inputStream, metadata));
-        } catch (IOException e) {
-            throw new RuntimeException("파일 업로드에 실패했습니다.", e);
-        }
-
+        String filePath = dirName + "/" + S3FileUtil.createSaveFileNameFromFileName(file.getOriginalFilename());
+        amazonS3.putObject(new PutObjectRequest(bucket, filePath, file.getInputStream(), metadata));
         return S3FileUtil.getFullPath(bucket, filePath);
+    }
+
+    @Override
+    public String uploadStreamFile(HttpServletRequest request, String dirName) throws IOException {
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentLength(request.getContentLengthLong());
+        metadata.setContentType(request.getContentType());
+
+        String filePath = dirName + "/" + S3FileUtil.createSaveFileNameFromContentType(request.getContentType());
+        amazonS3.putObject(new PutObjectRequest(bucket, filePath, request.getInputStream(), metadata));
+        return S3FileUtil.getFullPath(bucket, filePath);
+    }
+
+    private void uploadS3(InputStream inputStream, String filePath, ObjectMetadata metadata) {
+        try {
+            amazonS3.putObject(new PutObjectRequest(bucket, filePath, inputStream, metadata));
+        } catch (Exception e) {
+            rollbackIfExists(bucket, filePath);
+        }
+    }
+
+    @Override
+    public String getPreSignedUrl() {
+        return null;
     }
 
     @Override
     public void deleteFile(String filePath, String dirName) {
         String fileName = S3FileUtil.extractFileNameFromUrl(filePath);
-
         if (fileName != null) {
             try {
                 fileName = URLDecoder.decode(fileName, "UTF-8");
@@ -61,7 +73,6 @@ public class S3FileServiceImpl implements FileService {
                 log.error("파일명 디코딩 중 오류 발생", e);
                 return;
             }
-
             // 디렉토리명과 파일명을 조합하여 전체 객체 키 생성
             String objectKey = dirName + "/" + fileName;
 
@@ -89,5 +100,10 @@ public class S3FileServiceImpl implements FileService {
                 throw e; // 다른 예외는 다시 던짐
             }
         }
+    }
+
+    private void rollbackIfExists(String bucket, String key) {
+        if (amazonS3.doesObjectExist(bucket, key))
+            amazonS3.deleteObject(bucket, key);
     }
 }
