@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import mvp.deplog.global.common.SuccessResponse;
 import mvp.deplog.infrastructure.s3.application.S3Service;
+import mvp.deplog.infrastructure.s3.dto.request.AbortS3MultipartUploadRequest;
 import mvp.deplog.infrastructure.s3.dto.request.CompleteS3MultipartUploadRequest;
 import mvp.deplog.infrastructure.s3.dto.request.InitS3MultipartUploadRequest;
 import mvp.deplog.infrastructure.s3.dto.response.ETagRes;
@@ -46,22 +47,29 @@ public class S3Controller {
     }
 
     // Description : AWS S3 Multipart Upload
-    @PostMapping("/init")
-    public ResponseEntity<SuccessResponse<InitUploadRes>> initUpload(
+    @PostMapping("/multipart/init")
+    public ResponseEntity<SuccessResponse<InitUploadRes>> initMultipartUpload(
             @RequestBody InitS3MultipartUploadRequest initS3MultipartUploadRequest
             ) {
         return ResponseEntity.ok(s3Service.initMultipartUpload(initS3MultipartUploadRequest));
     }
 
-    @PostMapping("/complete")
-    public ResponseEntity<SuccessResponse<LocationRes>> completeUpload(
+    @PostMapping("/multipart/complete")
+    public ResponseEntity<SuccessResponse<LocationRes>> completeMultipartUpload(
             @RequestBody CompleteS3MultipartUploadRequest completeS3MultipartUploadRequest
             ) {
-        return ResponseEntity.ok(s3Service.completeMultipartUploadRequest(completeS3MultipartUploadRequest));
+        return ResponseEntity.ok(s3Service.completeMultipartUpload(completeS3MultipartUploadRequest));
     }
 
-    @PostMapping("/chunk")
-    public ResponseEntity<SuccessResponse<ETagRes>> uploadChunk(
+    @PostMapping("/multipart/abort")
+    public ResponseEntity<SuccessResponse<?>> abortMultipartUpload(
+            @RequestBody AbortS3MultipartUploadRequest abortS3MultipartUploadRequest
+            ) {
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/multipart/chunk")
+    public ResponseEntity<SuccessResponse<ETagRes>> uploadStreamChunk(
             @RequestParam("uploadId") String uploadId,
             @RequestParam("partNumber") int partNumber,
             @RequestParam(value = "filePath") String filePath,

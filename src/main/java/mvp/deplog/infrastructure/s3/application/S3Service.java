@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.model.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import mvp.deplog.global.common.SuccessResponse;
+import mvp.deplog.infrastructure.s3.dto.request.AbortS3MultipartUploadRequest;
 import mvp.deplog.infrastructure.s3.dto.request.CompleteS3MultipartUploadRequest;
 import mvp.deplog.infrastructure.s3.dto.request.InitS3MultipartUploadRequest;
 import mvp.deplog.infrastructure.s3.dto.response.ETagRes;
@@ -62,18 +63,24 @@ public class S3Service {
         return SuccessResponse.of(initUploadRes);
     }
 
-    public SuccessResponse<LocationRes> completeMultipartUploadRequest(CompleteS3MultipartUploadRequest completeS3MultipartUploadRequest) {
+    public SuccessResponse<LocationRes> completeMultipartUpload(CompleteS3MultipartUploadRequest completeS3MultipartUploadRequest) {
         CompleteMultipartUploadResult completeMultipartUploadResult =
                 fileUploader.completeMultipartUpload(
                         completeS3MultipartUploadRequest.getUploadId(),
                         completeS3MultipartUploadRequest.getPartList(),
-                        completeS3MultipartUploadRequest.getFilePath(),
-                        DIRNAME
+                        completeS3MultipartUploadRequest.getFilePath()
                 );
         LocationRes locationRes = LocationRes.builder()
                 .location(completeMultipartUploadResult.getLocation())
                 .build();
         return SuccessResponse.of(locationRes);
+    }
+
+    public void abortMultipartUpload(AbortS3MultipartUploadRequest abortS3MultipartUploadRequest) {
+        fileUploader.abortMultipartUpload(
+                abortS3MultipartUploadRequest.getUploadId(),
+                abortS3MultipartUploadRequest.getFilePath()
+        );
     }
 
     public SuccessResponse<ETagRes> uploadStreamChunk(String uploadId, int partNumber, String filePath, HttpServletRequest request) throws IOException {
@@ -85,7 +92,7 @@ public class S3Service {
     }
 
     public SuccessResponse<FileUrlRes> getMultipartPreSignedUrl(String uploadId, int partNumber, String filePath) {
-        String preSignedUrl = fileUploader.generatePreSignedUrlForMultipartUpload(uploadId, partNumber, filePath, DIRNAME);
+        String preSignedUrl = fileUploader.generatePreSignedUrlForMultipartUpload(uploadId, partNumber, filePath);
         FileUrlRes fileUrlRes = FileUrlRes.builder()
                 .fileUrl(preSignedUrl)
                 .build();

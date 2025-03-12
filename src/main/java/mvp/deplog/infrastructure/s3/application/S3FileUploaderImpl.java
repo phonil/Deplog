@@ -75,7 +75,7 @@ public class S3FileUploaderImpl implements FileUploader {
 
     // Description : 2. Pre-Signed Url 발급
     @Override
-    public String generatePreSignedUrlForMultipartUpload(String uploadId, int partNumber, String filePath, String dirName) {
+    public String generatePreSignedUrlForMultipartUpload(String uploadId, int partNumber, String filePath) {
         Date expiration = Date.from(LocalDateTime.now().plusMinutes(10).atZone(ZoneId.systemDefault()).toInstant());
         GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucket, filePath)
                 .withMethod(HttpMethod.PUT)
@@ -87,13 +87,20 @@ public class S3FileUploaderImpl implements FileUploader {
 
     // Description : 3. 업로드 완료 요청
     @Override
-    public CompleteMultipartUploadResult completeMultipartUpload(String uploadId, List<CompleteS3MultipartUploadRequest.Part> partList, String filePath, String dirName) {
+    public CompleteMultipartUploadResult completeMultipartUpload(String uploadId, List<CompleteS3MultipartUploadRequest.Part> partList, String filePath) {
         List<PartETag> partETags = partList.stream()
                 .map(part -> new PartETag(part.getPartNumber(), part.getETag()))
                 .collect(Collectors.toList());
         CompleteMultipartUploadRequest completeMultipartUploadRequest =
                 new CompleteMultipartUploadRequest(bucket, filePath, uploadId, partETags);
         return amazonS3.completeMultipartUpload(completeMultipartUploadRequest);
+    }
+
+    // Description : exception. 업로드 취소
+    @Override
+    public void abortMultipartUpload(String uploadId, String filePath) {
+        AbortMultipartUploadRequest abortMultipartUploadRequest = new AbortMultipartUploadRequest(bucket, filePath, uploadId);
+        amazonS3.abortMultipartUpload(abortMultipartUploadRequest);
     }
 
     @Override

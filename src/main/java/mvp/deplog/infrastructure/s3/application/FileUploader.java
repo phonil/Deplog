@@ -21,10 +21,10 @@ public interface FileUploader {
     // AWS S3 Multipart - 업로드 시작 요청
     InitiateMultipartUploadResult initMultipartUpload(String fileType, String dirName);
     // AWS S3 Multipart - 업로드 완료 요청
-    CompleteMultipartUploadResult completeMultipartUpload(String uploadId, List<CompleteS3MultipartUploadRequest.Part> partList, String filePath, String dirName);
+    CompleteMultipartUploadResult completeMultipartUpload(String uploadId, List<CompleteS3MultipartUploadRequest.Part> partList, String filePath);
+    void abortMultipartUpload(String uploadId, String filePath);
     // AWS S3 Multipart - 파트별 Pre-Signed Url 생성
-    String generatePreSignedUrlForMultipartUpload(String uploadId, int partNumber, String filePath, String dirName);
+    String generatePreSignedUrlForMultipartUpload(String uploadId, int partNumber, String filePath);
     void deleteFile(String fileName, String dirName);
-
     UploadPartResult uploadStreamChunk(String uploadId, int partNumber, String filePath, HttpServletRequest request) throws IOException;
 }
