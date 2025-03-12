@@ -17,6 +17,10 @@ public class S3FileUtil {
         return uuid + "." + ext;
     }
 
+    public static String createSaveFileName() {
+        return UUID.randomUUID().toString();
+    }
+
     // 확장자명 구하기
     public static String extractExtFromFileName(String originalFileName) {
         int pos = originalFileName.lastIndexOf(".");

@@ -2,14 +2,12 @@ package mvp.deplog.infrastructure.s3.application;
 
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.AmazonS3Exception;
-import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import mvp.deplog.infrastructure.s3.S3FileUtil;
+import mvp.deplog.infrastructure.s3.dto.request.CompleteS3MultipartUploadRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,6 +18,8 @@ import java.net.URLDecoder;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -61,6 +61,51 @@ public class S3FileUploaderImpl implements FileUploader {
                 .withMethod(HttpMethod.PUT)
                 .withExpiration(expiration);
         return amazonS3.generatePresignedUrl(generatePresignedUrlRequest).toString();
+    }
+
+    // Description : 1. 업로드 시작 요청
+    @Override
+    public InitiateMultipartUploadResult initMultipartUpload(String fileType, String dirName) {
+        ObjectMetadata metadata = new ObjectMetadata();
+        String contentType = S3FileUtil.extractExtFromContentType(fileType);
+        metadata.setContentType(contentType);
+        String filePath = dirName + "/" + S3FileUtil.createSaveFileNameFromContentType(contentType);
+        return amazonS3.initiateMultipartUpload(new InitiateMultipartUploadRequest(bucket, filePath, metadata));
+    }
+
+    // Description : 2. Pre-Signed Url 발급
+    @Override
+    public String generatePreSignedUrlForMultipartUpload(String uploadId, int partNumber, String filePath, String dirName) {
+        Date expiration = Date.from(LocalDateTime.now().plusMinutes(10).atZone(ZoneId.systemDefault()).toInstant());
+        GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucket, filePath)
+                .withMethod(HttpMethod.PUT)
+                .withExpiration(expiration);
+        generatePresignedUrlRequest.addRequestParameter("uploadId", uploadId);
+        generatePresignedUrlRequest.addRequestParameter("partNumber", Integer.toString(partNumber));
+        return amazonS3.generatePresignedUrl(generatePresignedUrlRequest).toString();
+    }
+
+    // Description : 3. 업로드 완료 요청
+    @Override
+    public CompleteMultipartUploadResult completeMultipartUpload(String uploadId, List<CompleteS3MultipartUploadRequest.Part> partList, String filePath, String dirName) {
+        List<PartETag> partETags = partList.stream()
+                .map(part -> new PartETag(part.getPartNumber(), part.getETag()))
+                .collect(Collectors.toList());
+        CompleteMultipartUploadRequest completeMultipartUploadRequest =
+                new CompleteMultipartUploadRequest(bucket, filePath, uploadId, partETags);
+        return amazonS3.completeMultipartUpload(completeMultipartUploadRequest);
+    }
+
+    @Override
+    public UploadPartResult uploadStreamChunk(String uploadId, int partNumber, String filePath, HttpServletRequest request) throws IOException {
+        UploadPartRequest uploadPartRequest = new UploadPartRequest();
+        uploadPartRequest.setBucketName(bucket);
+        uploadPartRequest.setUploadId(uploadId);
+        uploadPartRequest.setPartNumber(partNumber);
+        uploadPartRequest.setKey(filePath);
+        uploadPartRequest.setPartSize(request.getContentLengthLong());
+        uploadPartRequest.setInputStream(request.getInputStream());
+        return amazonS3.uploadPart(uploadPartRequest);
     }
 
     private void uploadS3(InputStream inputStream, String filePath, ObjectMetadata metadata) {

@@ -1,6 +1,5 @@
 package mvp.deplog.domain.post.application;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import mvp.deplog.domain.comment.domain.repository.CommentRepository;
 import mvp.deplog.domain.likes.domain.repository.LikesRepository;
@@ -446,29 +445,5 @@ public class PostService {
                 .build();
 
         return SuccessResponse.of(createPostRes);
-    }
-
-    public SuccessResponse<FileUrlRes> uploadFile(MultipartFile multipartFile) throws IOException {
-        String filePath = fileUploader.uploadMultipartFile(multipartFile, DIRNAME);
-        FileUrlRes fileUrlRes = FileUrlRes.builder()
-                .fileUrl(filePath)
-                .build();
-        return SuccessResponse.of(fileUrlRes);
-    }
-
-    public SuccessResponse<FileUrlRes> uploadStreamFile(HttpServletRequest request) throws IOException{
-        String filePath = fileUploader.uploadStreamFile(request, DIRNAME);
-        FileUrlRes fileUrlRes = FileUrlRes.builder()
-                .fileUrl(filePath)
-                .build();
-        return SuccessResponse.of(fileUrlRes);
-    }
-
-    public SuccessResponse<FileUrlRes> getPreSignedUrl(String contentType) {
-        String preSignedUrl = fileUploader.generatePreSignedUrl(contentType, DIRNAME);
-        FileUrlRes fileUrlRes = FileUrlRes.builder()
-                .fileUrl(preSignedUrl)
-                .build();
-        return SuccessResponse.of(fileUrlRes);
     }
 }
