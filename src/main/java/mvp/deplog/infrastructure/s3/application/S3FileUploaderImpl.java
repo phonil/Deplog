@@ -115,6 +115,13 @@ public class S3FileUploaderImpl implements FileUploader {
         return amazonS3.uploadPart(uploadPartRequest);
     }
 
+    @Override
+    public List<PartSummary> getUploadedPartList(String uploadId, String filePath) {
+        ListPartsRequest listPartsRequest = new ListPartsRequest(bucket, filePath, uploadId);
+        PartListing partListing = amazonS3.listParts(listPartsRequest);
+        return partListing.getParts();
+    }
+
     private void uploadS3(InputStream inputStream, String filePath, ObjectMetadata metadata) {
         try {
             amazonS3.putObject(new PutObjectRequest(bucket, filePath, inputStream, metadata));

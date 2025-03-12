@@ -7,15 +7,14 @@ import mvp.deplog.global.common.SuccessResponse;
 import mvp.deplog.infrastructure.s3.dto.request.AbortS3MultipartUploadRequest;
 import mvp.deplog.infrastructure.s3.dto.request.CompleteS3MultipartUploadRequest;
 import mvp.deplog.infrastructure.s3.dto.request.InitS3MultipartUploadRequest;
-import mvp.deplog.infrastructure.s3.dto.response.ETagRes;
-import mvp.deplog.infrastructure.s3.dto.response.FileUrlRes;
-import mvp.deplog.infrastructure.s3.dto.response.LocationRes;
-import mvp.deplog.infrastructure.s3.dto.response.InitUploadRes;
+import mvp.deplog.infrastructure.s3.dto.request.PreResumePartRequest;
+import mvp.deplog.infrastructure.s3.dto.response.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static mvp.deplog.infrastructure.s3.S3Constant.DIRNAME;
 
@@ -51,9 +50,9 @@ public class S3Service {
     }
 
     // Description : AWS Multipart Upload
-    public SuccessResponse<InitUploadRes> initMultipartUpload(InitS3MultipartUploadRequest initiateMultipartUploadRequest) {
+    public SuccessResponse<InitUploadRes> initMultipartUpload(InitS3MultipartUploadRequest initMultipartUploadRequest) {
         InitiateMultipartUploadResult initiateMultipartUploadResult = fileUploader.initMultipartUpload(
-                initiateMultipartUploadRequest.getFileType(),
+                initMultipartUploadRequest.getFileType(),
                 DIRNAME
         );
         InitUploadRes initUploadRes = InitUploadRes.builder()
@@ -97,5 +96,23 @@ public class S3Service {
                 .fileUrl(preSignedUrl)
                 .build();
         return SuccessResponse.of(fileUrlRes);
+    }
+
+    public SuccessResponse<UploadedPartResponse> getPreResumeChunk(PreResumePartRequest preResumePartRequest) {
+        List<PartSummary> uploadedPartSummaryList = fileUploader.getUploadedPartList(
+                preResumePartRequest.getUploadId(),
+                preResumePartRequest.getFilePath()
+        );
+        List<UploadedPartResponse.Part> uploadedPartList = uploadedPartSummaryList.stream()
+                .map(partSummary ->
+                        UploadedPartResponse.Part.builder()
+                                .partNumber(partSummary.getPartNumber())
+                                .eTag(partSummary.getETag())
+                                .build()
+                ).toList();
+        UploadedPartResponse uploadedPartResponse = UploadedPartResponse.builder()
+                .uploadedPartList(uploadedPartList)
+                .build();
+        return SuccessResponse.of(uploadedPartResponse);
     }
 }

@@ -7,6 +7,7 @@ import mvp.deplog.infrastructure.s3.application.S3Service;
 import mvp.deplog.infrastructure.s3.dto.request.AbortS3MultipartUploadRequest;
 import mvp.deplog.infrastructure.s3.dto.request.CompleteS3MultipartUploadRequest;
 import mvp.deplog.infrastructure.s3.dto.request.InitS3MultipartUploadRequest;
+import mvp.deplog.infrastructure.s3.dto.request.PreResumePartRequest;
 import mvp.deplog.infrastructure.s3.dto.response.ETagRes;
 import mvp.deplog.infrastructure.s3.dto.response.FileUrlRes;
 import mvp.deplog.infrastructure.s3.dto.response.LocationRes;
@@ -65,6 +66,7 @@ public class S3Controller {
     public ResponseEntity<SuccessResponse<?>> abortMultipartUpload(
             @RequestBody AbortS3MultipartUploadRequest abortS3MultipartUploadRequest
             ) {
+        s3Service.abortMultipartUpload(abortS3MultipartUploadRequest);
         return ResponseEntity.noContent().build();
     }
 
@@ -85,5 +87,12 @@ public class S3Controller {
             @RequestParam("filePath") String filePath
             )  {
         return ResponseEntity.ok(s3Service.getMultipartPreSignedUrl(uploadId, partNumber, filePath));
+    }
+
+    @GetMapping("/multipart/pre-resume")
+    public ResponseEntity<SuccessResponse<?>> getPreResumeChunk(
+            @RequestBody PreResumePartRequest preResumePartRequest
+    ) {
+        return ResponseEntity.ok(s3Service.getPreResumeChunk(preResumePartRequest));
     }
 }

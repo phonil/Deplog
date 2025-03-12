@@ -2,6 +2,7 @@ package mvp.deplog.infrastructure.s3.application;
 
 import com.amazonaws.services.s3.model.CompleteMultipartUploadResult;
 import com.amazonaws.services.s3.model.InitiateMultipartUploadResult;
+import com.amazonaws.services.s3.model.PartSummary;
 import com.amazonaws.services.s3.model.UploadPartResult;
 import jakarta.servlet.http.HttpServletRequest;
 import mvp.deplog.infrastructure.s3.dto.request.CompleteS3MultipartUploadRequest;
@@ -27,4 +28,5 @@ public interface FileUploader {
     String generatePreSignedUrlForMultipartUpload(String uploadId, int partNumber, String filePath);
     void deleteFile(String fileName, String dirName);
     UploadPartResult uploadStreamChunk(String uploadId, int partNumber, String filePath, HttpServletRequest request) throws IOException;
+    List<PartSummary> getUploadedPartList(String uploadId, String filePath);
 }
