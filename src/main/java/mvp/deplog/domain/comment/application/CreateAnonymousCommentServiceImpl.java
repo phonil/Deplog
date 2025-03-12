@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import mvp.deplog.domain.comment.domain.Comment;
 import mvp.deplog.domain.comment.domain.repository.CommentRepository;
 import mvp.deplog.domain.comment.dto.request.CreateCommentReq;
-import mvp.deplog.domain.member.domain.Member;
 import mvp.deplog.domain.member.domain.Role;
 import mvp.deplog.domain.post.domain.Post;
 import mvp.deplog.domain.post.domain.repository.PostRepository;

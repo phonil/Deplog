@@ -42,6 +42,7 @@ public class SecurityConfig {
             "/posts/**",
             "/images/**",
             "/test",
+            "/actuator/**"
     };
 
     private static final String[] NEED_TOKEN = {

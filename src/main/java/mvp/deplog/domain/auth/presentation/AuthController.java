@@ -1,12 +1,10 @@
 package mvp.deplog.domain.auth.presentation;
 
-import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import mvp.deplog.domain.auth.application.AuthService;
-import mvp.deplog.domain.auth.application.AuthServiceImpl;
-import mvp.deplog.domain.auth.dto.request.LoginReq;
 import mvp.deplog.domain.auth.dto.request.JoinReq;
+import mvp.deplog.domain.auth.dto.request.LoginReq;
 import mvp.deplog.domain.auth.dto.request.LogoutReq;
 import mvp.deplog.domain.auth.dto.request.ModifyPasswordReq;
 import mvp.deplog.domain.auth.dto.response.EmailDuplicateCheckRes;

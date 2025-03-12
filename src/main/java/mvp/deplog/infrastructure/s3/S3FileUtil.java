@@ -5,16 +5,31 @@ import java.util.UUID;
 public class S3FileUtil {
 
     // 파일 저장명 만들기
-    public static String createSaveFileName(String originalFileName) {
-        String ext = extractExt(originalFileName);
+    public static String createSaveFileNameFromFileName(String originalFileName) {
+        String ext = extractExtFromFileName(originalFileName);
         String uuid = UUID.randomUUID().toString();
         return uuid + "." + ext;
     }
 
+    public static String createSaveFileNameFromContentType(String contentType) {
+        String ext = extractExtFromContentType(contentType);
+        String uuid = UUID.randomUUID().toString();
+        return uuid + "." + ext;
+    }
+
+    public static String createSaveFileName() {
+        return UUID.randomUUID().toString();
+    }
+
     // 확장자명 구하기
-    public static String extractExt(String originalFileName) {
+    public static String extractExtFromFileName(String originalFileName) {
         int pos = originalFileName.lastIndexOf(".");
         return originalFileName.substring(pos + 1);
+    }
+
+    public static String extractExtFromContentType(String contentType) {
+        int pos = contentType.lastIndexOf("/");
+        return contentType.substring(pos + 1);
     }
 
     // 전체 경로 만들기

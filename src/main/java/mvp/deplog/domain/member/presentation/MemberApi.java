@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import mvp.deplog.domain.member.dto.request.ModifyAvatarReq;
 import mvp.deplog.domain.member.dto.response.MyInfoRes;
-import mvp.deplog.domain.post.dto.request.CreatePostReq;
 import mvp.deplog.global.common.Message;
 import mvp.deplog.global.common.SuccessResponse;
 import mvp.deplog.global.exception.ErrorResponse;
@@ -19,8 +18,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "Member API", description = "회원 관련 API입니다.")
 public interface MemberApi {

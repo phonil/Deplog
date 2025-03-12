@@ -9,18 +9,14 @@ import mvp.deplog.domain.member.dto.response.MyInfoRes;
 import mvp.deplog.global.common.Message;
 import mvp.deplog.global.common.SuccessResponse;
 import mvp.deplog.global.security.UserDetailsImpl;
-import mvp.deplog.infrastructure.s3.application.FileService;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
 public class MemberServiceImpl implements MemberService {
-
-    private final FileService fileService;
 
     private final MemberRepository memberRepository;
     private final MemberMapper memberMapper;

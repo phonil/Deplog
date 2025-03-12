@@ -10,10 +10,10 @@ import mvp.deplog.domain.member.dto.Avatar;
 import mvp.deplog.domain.post.domain.Post;
 import mvp.deplog.domain.post.domain.Stage;
 import mvp.deplog.domain.post.domain.repository.PostRepository;
-import mvp.deplog.domain.post.dto.response.CreatePostRes;
 import mvp.deplog.domain.post.dto.request.CreatePostReq;
-import mvp.deplog.domain.post.dto.response.TempListRes;
+import mvp.deplog.domain.post.dto.response.CreatePostRes;
 import mvp.deplog.domain.post.dto.response.PostListRes;
+import mvp.deplog.domain.post.dto.response.TempListRes;
 import mvp.deplog.domain.post.dto.response.TempPostDetailRes;
 import mvp.deplog.domain.post.exception.ResourceNotFoundException;
 import mvp.deplog.domain.post.exception.UnauthorizedException;
@@ -28,7 +28,7 @@ import mvp.deplog.global.common.PageResponse;
 import mvp.deplog.global.common.SuccessResponse;
 import mvp.deplog.global.security.UserDetailsImpl;
 import mvp.deplog.infrastructure.markdown.MarkdownUtil;
-import mvp.deplog.infrastructure.s3.application.FileService;
+import mvp.deplog.infrastructure.s3.application.FileUploader;
 import mvp.deplog.infrastructure.s3.dto.response.FileUrlRes;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,19 +38,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static mvp.deplog.domain.post.constant.PostConstant.*;
+import static mvp.deplog.domain.post.constant.PostConstant.DIRNAME;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
 public class PostService {
 
-    private final FileService fileService;
+    private final FileUploader fileUploader;
 
     private final PostRepository postRepository;
     private final TagRepository tagRepository;
@@ -172,13 +173,11 @@ public class PostService {
         return posts;
     }
 
-    public SuccessResponse<FileUrlRes> uploadImages(MultipartFile multipartFile) {
-        String filePath = fileService.uploadFile(multipartFile, DIRNAME);
-
+    public SuccessResponse<FileUrlRes> uploadImages(MultipartFile multipartFile) throws IOException {
+        String filePath = fileUploader.uploadMultipartFile(multipartFile, DIRNAME);
         FileUrlRes fileUrlRes = FileUrlRes.builder()
                 .fileUrl(filePath)
                 .build();
-
         return SuccessResponse.of(fileUrlRes);
     }
 
@@ -423,7 +422,7 @@ public class PostService {
         // 기존 이미지 url이 수정된 게시글에 있는지 확인
         for(String oldImageUrl : oldImageUrls) {
             if(!newImageUrls.contains(oldImageUrl)) {
-                fileService.deleteFile(oldImageUrl, DIRNAME);
+                fileUploader.deleteFile(oldImageUrl, DIRNAME);
             }
         }
 

@@ -5,17 +5,19 @@ import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.RequiredArgsConstructor;
 import mvp.deplog.domain.auth.dto.mapper.MemberAuthMapper;
+import mvp.deplog.domain.auth.dto.request.JoinReq;
 import mvp.deplog.domain.auth.dto.request.LoginReq;
 import mvp.deplog.domain.auth.dto.request.LogoutReq;
 import mvp.deplog.domain.auth.dto.request.ModifyPasswordReq;
 import mvp.deplog.domain.auth.dto.response.EmailDuplicateCheckRes;
 import mvp.deplog.domain.auth.dto.response.LoginRes;
-import mvp.deplog.domain.auth.dto.request.JoinReq;
 import mvp.deplog.domain.auth.dto.response.ReissueRes;
 import mvp.deplog.domain.comment.domain.Comment;
 import mvp.deplog.domain.comment.domain.repository.CommentRepository;
 import mvp.deplog.domain.likes.domain.Likes;
 import mvp.deplog.domain.likes.domain.repository.LikesRepository;
+import mvp.deplog.domain.member.domain.Member;
+import mvp.deplog.domain.member.domain.repository.MemberRepository;
 import mvp.deplog.domain.post.domain.Post;
 import mvp.deplog.domain.post.domain.repository.PostRepository;
 import mvp.deplog.domain.scrap.domain.Scrap;
@@ -26,8 +28,6 @@ import mvp.deplog.domain.tagging.Tagging;
 import mvp.deplog.domain.tagging.repository.TaggingRepository;
 import mvp.deplog.global.common.Message;
 import mvp.deplog.global.common.SuccessResponse;
-import mvp.deplog.domain.member.domain.Member;
-import mvp.deplog.domain.member.domain.repository.MemberRepository;
 import mvp.deplog.global.security.UserDetailsImpl;
 import mvp.deplog.global.security.jwt.JwtTokenProvider;
 import mvp.deplog.infrastructure.redis.RedisUtil;
@@ -43,9 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
