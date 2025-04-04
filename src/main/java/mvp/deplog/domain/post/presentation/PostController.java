@@ -1,11 +1,14 @@
 package mvp.deplog.domain.post.presentation;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import mvp.deplog.domain.member.domain.Part;
 import mvp.deplog.domain.post.application.PostDetailService;
 import mvp.deplog.domain.post.application.PostDetailServiceFactory;
 import mvp.deplog.domain.post.application.PostService;
+import mvp.deplog.domain.post.dto.PostDetailParams;
 import mvp.deplog.domain.post.dto.request.CreatePostReq;
 import mvp.deplog.domain.post.dto.response.CreatePostRes;
 import mvp.deplog.domain.post.dto.response.TempListRes;
@@ -73,11 +76,13 @@ public class PostController implements PostApi {
     @Override
     @GetMapping("/details/{postId}")
     public ResponseEntity<SuccessResponse<?>> getPostDetail(
+            HttpServletRequest request,
+            HttpServletResponse response,
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @PathVariable("postId") Long postId
     ) {
         PostDetailService<?> postDetailService = postDetailServiceFactory.find(userDetails);
-        return ResponseEntity.ok(postDetailService.getPostDetail(userDetails, postId));
+        return ResponseEntity.ok(postDetailService.getPostDetail(PostDetailParams.of(userDetails, postId, request, response)));
     }
 
     @Override

@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import mvp.deplog.domain.member.domain.Part;
 import mvp.deplog.domain.post.dto.request.CreatePostReq;
@@ -122,6 +124,8 @@ public interface PostApi {
     })
     @GetMapping("/details/{postId}")
     ResponseEntity<SuccessResponse<?>> getPostDetail(
+            HttpServletRequest request,
+            HttpServletResponse response,
             @Parameter(description = "Access Token을 입력하세요.", required = true) @AuthenticationPrincipal UserDetailsImpl userDetails,
             @Parameter(description = "게시글의 번호(아이디)를 입력해주세요.", required = true) @PathVariable(value = "postId") Long postId
     );

@@ -5,6 +5,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 import mvp.deplog.domain.member.WriterInfo;
+import mvp.deplog.domain.member.domain.Member;
+import mvp.deplog.domain.member.dto.Avatar;
+import mvp.deplog.domain.post.domain.Post;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -49,4 +52,21 @@ public class MemberPostDetailRes {
 
     @Schema(type = "WriterInfo", description = "게시글 작성자 처리에 필요한 정보")
     private WriterInfo writerInfo;
+
+    public static MemberPostDetailRes of(Post post, Member writer, List<String> tagNameList, boolean sameUser, boolean liked, boolean scraped) {
+        return MemberPostDetailRes.builder()
+                .postId(post.getId())
+                .mine(sameUser)
+                .title(post.getTitle())
+                .createdDate(post.getCreatedDate().toLocalDate())
+                .content(post.getContent())
+                .tagNameList(tagNameList)
+                .viewCount(post.getViewCount())
+                .likeCount(post.getLikeCount())
+                .scrapCount(post.getScrapCount())
+                .liked(liked)
+                .scraped(scraped)
+                .writerInfo(WriterInfo.of(writer))
+                .build();
+    }
 }
