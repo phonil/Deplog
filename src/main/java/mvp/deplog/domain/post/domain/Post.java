@@ -84,9 +84,8 @@ public class Post extends BaseEntity {
     }
     // 스크랩 수 감소
     public void decrementScrapCount() {
-        if(this.scrapCount > 0){
+        if(this.scrapCount > 0)
             this.scrapCount--;
-        }
     }
     // 좋아요 수 증가
     public void incrementLikesCount() {
@@ -94,9 +93,8 @@ public class Post extends BaseEntity {
     }
     // 좋아요 수 감소
     public void decrementLikesCount() {
-        if(this.likeCount > 0){
+        if(this.likeCount > 0)
             this.likeCount--;
-        }
     }
     // 조회수 증가
     public void incrementViewCount() {

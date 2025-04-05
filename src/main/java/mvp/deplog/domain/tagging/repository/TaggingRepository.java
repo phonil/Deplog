@@ -12,6 +12,7 @@ import java.util.List;
 
 public interface TaggingRepository extends JpaRepository<Tagging, Long> {
 
+    @Query("SELECT t FROM Tagging t JOIN FETCH t.tag WHERE t.post = :post")
     List<Tagging> findByPost(Post post);
 
     @Query("SELECT t FROM Tagging t WHERE t.tag = :tag AND t.post.stage = 'PUBLISHED'")

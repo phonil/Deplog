@@ -49,10 +49,9 @@ public class MemberPostDetailServiceImpl implements PostDetailService<MemberPost
 
         String key = REDIS_KEY_MEMBER_PREFIX + member.getId() + REDIS_KEY_POST_PREFIX + post.getId();
         if (!redisUtil.hasKey(key)) {
-            post.incrementViewCount();
+            postRepository.incrementViewCount(postDetailParams.getPostId());
             redisUtil.setDataExpire(key, POST_REDIS_VALUE, REDIS_DURATION);
         }
-
         List<String> tagNameList = taggingRepository.findByPost(post).stream()
                 .map(tagging -> tagging.getTag().getName())
                 .collect(Collectors.toList());
